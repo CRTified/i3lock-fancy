@@ -6,7 +6,7 @@ set -o errexit -o noclobber -o nounset
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
-font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
+font=$(fc-match sans -f "%{family}\n" | tr ',' '\n' | while read fontLine; do convert -list font | awk "{ a[NR] = \$2 } /family: $fontLine/ { print a[NR-1]; exit }"; done | head -n1)
 image=$(mktemp --suffix=.png)
 shot=(import -silent -window root)
 desktop=""
@@ -22,7 +22,7 @@ options="Options:
 
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
 
-    -f <fontname>, --font <fontname>  Set a custom font.
+    -f <fontname>, --font <fontname>  Set a custom font. (Default: ${font})
 
     -t <text>, --text <text> Set a custom text prompt.
 
